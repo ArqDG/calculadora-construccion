@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Materiales PRO</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{ 
+  font-family:'Segoe UI',sans-serif;
+  background:url('fondo.jpg') no-repeat center/cover fixed;
+  min-height:100vh;
+  color:#fff;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.65);
+  z-index:-1;
+}
+
+header{
+  text-align:center;
+  padding:30px 15px;
+}
+
+header h1{font-size:32px;}
+header p{color:
+#ccc;font-size:14px;}
+
+.container{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:20px;
+  padding:20px;
+  max-width:1200px;
+  margin:auto;
+}
+
+.card{
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(12px);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  transition:.3s;
+}
+
+.card:hover{transform:translateY(-5px) scale(1.02);}
+
+.card h3{color:#fe9307;margin-bottom:10px;}
+
+input,select{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#007BFF,#00c6ff);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.result{
+  margin-top:15px;
+  background:rgba(0,0,0,0.4);
+  padding:12px;
+  border-radius:10px;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+.actions button{flex:1;}
+
+footer{
+  text-align:center;
+  padding:15px;
+  color:#aaa;
+  font-size:12px;
+
+.logo{
+  width:80px;
+  margin-bottom:10px;
+}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<img src="logo.png" alt="Logo" class="logo">
+<h1>Calculadora de Materiales</h1>
+<p>Versión profesional lista para obra</p>
+</header>
+
+<div class="container">
+
+<div class="card">
+<h3>Ladrillo Común</h3>
+Lago (m)
+<input id="l1" placeholder="">
+Alto (m)
+<input id="a1" placeholder="">
+Espesor de muro
+<select id="p1">
+<option value="tabique">Tabique</option>
+<option value="15">15 cm</option>
+<option value="20">20 cm</option>
+<option value="30">30 cm</option>
+</select>
+Tipo de mezcla
+<select id="m1"></select>
+<button onclick="calc1()">Calcular</button>
+<div id="r1" class="result"></div>
+<div class="actions">
+<button onclick="limpiar1('r1')">Actualizar</button>
+<button onclick="exportar('r1')">PDF</button>
+</div>
+</div>
+
+<div class="card">
+<h3>Ladrillo Hueco</h3>
+Lago (m)
+<input id="l2" placeholder="">
+Alto (m)
+<input id="a2" placeholder="">
+Espesor de muro
+<select id="e2">
+<option value="8x18x33">8x18x33</option>
+<option value="12x18x33">12x18x33</option>
+<option value="18x18x33">18x18x33</option>
+</select>
+Tipo de mezcla
+
+<select id="m2">
+<option value="1:1/4:3">1:1/4:3</option>
+<option value="1:5">1:5 (Cemento albañilería)</option>
+</select>
+<button onclick="calc2()">Calcular</button>
+<div id="r2" class="result"></div>
+<div class="actions">
+<button onclick="limpiar2('r2')">Actualizar</button>
+<button onclick="exportar('r2')">PDF</button>
+</div>
+</div>
+
+<div class="card">
+<h3>Retak</h3>
+Lago (m)
+<input id="l3" placeholder="">
+Alto (m)
+<input id="a3" placeholder="">
+Tipo de muro
+<select id="t3">
+<option value="noportante">No portante</option>
+<option value="portante">Portante</option>
+</select>
+Espesor de muro
+<select id="e3"></select>
+<button onclick="calc3()">Calcular</button>
+<div id="r3" class="result"></div>
+<div class="actions">
+<button onclick="limpiar3('r3')">Actualizar</button>
+<button onclick="exportar('r3')">PDF</button>
+</div>
+</div>
+
+</div>
+
+<footer>© 2026 Calculadora PRO</footer>
+
+<script>
+// datos completos
+const mat={tabique:{l:30,m:{"1:1/4:3":{c:2,ce:2.1,a:0.01},"1:5":{c:0,ce:2.2,a:0.012}}},"15":{l:60,m:{"1:1/4:3":{c:7.3,ce:7.5,a:0.035},"1:5":{c:0,ce:7.7,a:0.043}}},"20":{l:90,m:{"1:1/4:3":{c:13.2,ce:6.9,a:0.065},"1:5":{c:0,ce:10.9,a:0.08}}},"30":{l:120,m:{"1:1/4:3":{c:19.1,ce:9.9,a:0.09},"1:3":{c:0,ce:15.2,a:0.115}}}};
+
+const hueco={"8x18x33":{l:16,m:{"1:1/4:3":{c:1.7,ce:4.2,a:0.018},"1:5":{c:0,ce:4.54,a:0.0225}}},"12x18x33":{l:16,m:{"1:1/4:3":{c:1.67,ce:4.16,a:0.018},"1:5":{c:0,ce:4.5,a:0.0225}}},"18x18x33":{l:16,m:{"1:1/4:3":{c:8,ce:8.2,a:0.038},"1:5":{c:0,ce:8.9,a:0.0475}}}};
+
+const retak={noportante:{7.5:2.7,10:3.15,12.5:3.9},portante:{15:4.7,17.5:5.5,20:6.25,25:7.8}};
+
+function actualizar(){
+let p=p1.value; m1.innerHTML="";
+if(p=="30") m1.innerHTML=`<option value="1:1/4:3">1:1/4:3</option><option value="1:3">1:3 (Cemento albañilería)</option>`;
+else m1.innerHTML=`<option value="1:1/4:3">1:1/4:3</option><option value="1:5">1:5 (Cemento albañilería)</option>`;
+}
+
+function actualizarRetak(){
+let t=t3.value;
+e3.innerHTML=t=="noportante"?
+`<option value="7.5">7.5</option><option value="10">10</option><option value="12.5">12.5</option>`:
+`<option value="15">15</option><option value="17.5">17.5</option><option value="20">20</option><option value="25">25</option>`;
+}
+
+p1.onchange=actualizar;
+t3.onchange=actualizarRetak;
+actualizar(); actualizarRetak();
+
+function calc1(){
+let l=l1.value,a=a1.value;
+if(!l||!a) return r1.innerHTML="⚠️ Ingresá datos";
+
+let m=l*a;
+let b=mat[p1.value];
+let d=b.m[m1.value];
+
+let espesorTexto = p1.value === "tabique" ? "Tabique" : p1.value + " cm";
+
+// 👇 cálculos
+let totalLadrillos = Math.ceil(b.l*m*1.05);
+let totalCal = (d.c*m*1.05).toFixed(2);
+let totalCemento = (d.ce*m*1.05).toFixed(2);
+let totalArena = (d.a*m*1.05).toFixed(3);
+
+r1.innerHTML=`
+m²: ${m.toFixed(2)}<br><br>
+
+<b>Tipo de ladrillo:</b> Común<br>
+<b>Dosaje seleccionado:</b> ${m1.value}<br><br>
+
+<b>Espesor de muro:</b> ${espesorTexto}<br><br>
+
+<b>Ladrillos por m²:</b> ${b.l}<br>
+<b>Total ladrillos:</b> ${totalLadrillos}<br> (incluye 5% desperdicio)<br><br>
+
+<b>Cal:</b> ${totalCal} kg<br>
+<b>Cemento:</b> ${totalCemento} kg<br>
+<b>Arena:</b> ${totalArena} m³
+`;
+}
+
+function calc2(){
+let l=l2.value,a=a2.value;
+if(!l||!a)return r2.innerHTML="⚠️ Ingresa datos";
+
+let m=l*a,
+b=hueco[e2.value],
+d=b.m[m2.value];
+
+// 👇 limpieza visual del espesor
+let espesor = e2.value.replace("x18x33"," cm");
+
+let totalLadrillos = Math.ceil(b.l*m*1.05);
+
+r2.innerHTML=`
+m²: ${m.toFixed(2)}<br><br>
+
+<b>Tipo de ladrillo:</b> Hueco (${e2.value})<br>
+<b>Dosaje seleccionado:</b> ${m2.value}<br><br>
+
+<b>Espesor de muro:</b> ${espesor}<br><br>
+
+<b>Ladrillos por m²:</b> ${b.l}<br>
+<b>Total ladrillos:</b> ${totalLadrillos}<br> (incluye 5% desperdicio)<br><br>
+
+<b>Cal:</b> ${(d.c*m*1.05).toFixed(2)} kg<br>
+<b>Cemento:</b> ${(d.ce*m*1.05).toFixed(2)} kg<br>
+<b>Arena:</b> ${(d.a*m*1.05).toFixed(3)} m³
+`;
+}
+
+function calc3(){
+let l=l3.value,a=a3.value;
+if(!l||!a)return r3.innerHTML="⚠️ Ingresa datos";
+
+let m=l*a;
+
+let bloques_m2 = 8;
+let tipoTexto = t3.value === "portante" ? "Portante" : "No portante";
+
+let totalBloques = Math.ceil(bloques_m2*m*1.05);
+let adhesivo = (retak[t3.value][e3.value]*m*1.05).toFixed(2);
+
+r3.innerHTML=`
+m²: ${m.toFixed(2)}<br><br>
+
+<b>Tipo de ladrillo:</b> Retak<br>
+<b>Condición:</b> ${tipoTexto}<br>
+<b>Espesor:</b> ${e3.value} cm<br><br>
+
+<b>Bloques por m²:</b> ${bloques_m2}<br>
+<b>Total bloques:</b> ${totalBloques} (incluye 5% desperdicio)<br><br>
+
+<b>Adhesivo:</b> ${adhesivo} kg<br>
+<b>Dosaje seleccionado:</b> según sistema Retak
+`;
+}
+
+function limpiar1(){
+  l1.value = "";
+  a1.value = "";
+  r1.innerHTML = "";
+}
+
+function limpiar2(){
+  l2.value = "";
+  a2.value = "";
+  r2.innerHTML = "";
+}
+
+function limpiar3(){
+  l3.value = "";
+  a3.value = "";
+  r3.innerHTML = "";
+}
+
+
+function exportar(id){
+  let contenido = document.getElementById(id).innerHTML;
+
+let fecha = new Date().toLocaleDateString();
+
+  let ventana = window.open('', '', 'width=800,height=600');
+
+  ventana.document.write(`
+    <html>
+    <head>
+      <title>Calculadora de Materiales</title>
+      <style>
+        body{
+          font-family: Arial;
+          padding: 30px;
+          text-align: center;
+        }
+
+        .logo{
+          width: 200px;
+          margin-bottom: 10px;
+        }
+
+        h2{
+          margin: 5px 0 20px 0;
+        }
+
+        .contenido{
+          text-align: left;
+          margin-top: 20px;
+          border-top: 2px solid #000;
+          padding-top: 15px;
+        }
+      </style>
+    </head>
+    <body>
+
+      <img src="logo.png" class="logo">
+      <h2>Calculadora de Materiales</h2>
+      <div class="fecha">Fecha: ${fecha}</div>
+
+      <div class="contenido">
+        ${contenido}
+      </div>
+
+    </body>
+    </html>
+  `);
+
+  ventana.document.close();
+  ventana.print();
+}
+</script>
+
+</body>
+</html>
