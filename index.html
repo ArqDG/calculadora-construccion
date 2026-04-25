@@ -6,7 +6,6 @@
 <title>Calculadora de Materiales PRO</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
 
-
 <link rel="manifest" href="manifest.json">
 
 <style>
@@ -52,6 +51,12 @@ header p{color:
   padding:20px;
   box-shadow:0 10px 30px rgba(0,0,0,0.5);
   transition:.3s;
+}
+
+.card p{
+	text-align:center;
+	font-size:15px;
+	color:#fff;
 }
 
 .card:hover{transform:translateY(-5px) scale(1.02);}
@@ -119,6 +124,7 @@ footer{
 
 <div class="card">
 <h3>Ladrillo Común</h3>
+<p>Sistema tradicional</p>
 Lago (m)
 <input id="l1" placeholder="">
 Alto (m)
@@ -142,6 +148,7 @@ Tipo de mezcla
 
 <div class="card">
 <h3>Ladrillo Hueco</h3>
+<p>Mayor rendimiento</p>
 Lago (m)
 <input id="l2" placeholder="">
 Alto (m)
@@ -168,6 +175,7 @@ Tipo de mezcla
 
 <div class="card">
 <h3>Retak</h3>
+<p>Alta eficiencia térmica</p>
 Lago (m)
 <input id="l3" placeholder="">
 Alto (m)
@@ -216,6 +224,18 @@ p1.onchange=actualizar;
 t3.onchange=actualizarRetak;
 actualizar(); actualizarRetak();
 
+function formatoM3(valor){
+  // redondeo hacia arriba a 2 decimales
+  let redondeado = Math.ceil(valor * 100) / 100;
+
+  // formato argentino
+  return redondeado.toLocaleString('es-AR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+
+  });
+}
+
 function calc1(){
 let l=l1.value,a=a1.value;
 if(!l||!a) return r1.innerHTML="⚠️ Ingresá datos";
@@ -227,13 +247,16 @@ let d=b.m[m1.value];
 let espesorTexto = p1.value === "tabique" ? "Tabique" : p1.value + " cm";
 
 // 👇 cálculos
-let totalLadrillos = Math.ceil(b.l*m*1.05);
-let totalCal = (d.c*m*1.05).toFixed(2);
-let totalCemento = (d.ce*m*1.05).toFixed(2);
-let totalArena = (d.a*m*1.05).toFixed(3);
+let totalLadrillos = Math.ceil(b.l*m*1.05).toLocaleString('es-AR');
+let totalCal = (d.c * m * 1.05).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+let totalCemento = (d.ce * m * 1.05).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+let totalArena = formatoM3(d.a*m*1.05);
 
 r1.innerHTML=`
-m²: ${m.toFixed(2)}<br><br>
+m²: ${m.toLocaleString('es-AR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})}<br><br>
 
 <b>Tipo de ladrillo:</b> Común<br>
 <b>Dosaje seleccionado:</b> ${m1.value}<br><br>
@@ -260,10 +283,13 @@ d=b.m[m2.value];
 // 👇 limpieza visual del espesor
 let espesor = e2.value.replace("x18x33"," cm");
 
-let totalLadrillos = Math.ceil(b.l*m*1.05);
+let totalLadrillos = Math.ceil(b.l*m*1.05).toLocaleString('es-AR');
 
 r2.innerHTML=`
-m²: ${m.toFixed(2)}<br><br>
+m²: ${m.toLocaleString('es-AR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})}<br><br>
 
 <b>Tipo de ladrillo:</b> Hueco (${e2.value})<br>
 <b>Dosaje seleccionado:</b> ${m2.value}<br><br>
@@ -273,9 +299,9 @@ m²: ${m.toFixed(2)}<br><br>
 <b>Ladrillos por m²:</b> ${b.l}<br>
 <b>Total ladrillos:</b> ${totalLadrillos}<br> (incluye 5% desperdicio)<br><br>
 
-<b>Cal:</b> ${(d.c*m*1.05).toFixed(2)} kg<br>
-<b>Cemento:</b> ${(d.ce*m*1.05).toFixed(2)} kg<br>
-<b>Arena:</b> ${(d.a*m*1.05).toFixed(3)} m³
+<b>Cal:</b> ${(d.c * m * 1.05).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg<br>
+b>Cemento:</b> ${(d.ce * m * 1.05).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg<br>
+<b>Arena:</b> ${formatoM3(d.a*m*1.05)} m³
 `;
 }
 
@@ -288,18 +314,24 @@ let m=l*a;
 let bloques_m2 = 8;
 let tipoTexto = t3.value === "portante" ? "Portante" : "No portante";
 
-let totalBloques = Math.ceil(bloques_m2*m*1.05);
-let adhesivo = (retak[t3.value][e3.value]*m*1.05).toFixed(2);
+let totalBloques = Math.ceil(bloques_m2*m*1.05).toLocaleString('es-AR');
+let adhesivo = (retak[t3.value][e3.value]*m*1.05).toLocaleString('es-AR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
 
 r3.innerHTML=`
-m²: ${m.toFixed(2)}<br><br>
+m²: ${m.toLocaleString('es-AR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})}<br><br>
 
 <b>Tipo de ladrillo:</b> Retak<br>
 <b>Condición:</b> ${tipoTexto}<br>
 <b>Espesor:</b> ${e3.value} cm<br><br>
 
-<b>Bloques por m²:</b> ${bloques_m2}<br>
-<b>Total bloques:</b> ${totalBloques} (incluye 5% desperdicio)<br><br>
+<b>Bloques por m²:</b> ${bloques_m2}<br><br>
+<b>Total bloques:</b> ${totalBloques}<br> (incluye 5% desperdicio)<br><br><br>
 
 <b>Adhesivo:</b> ${adhesivo} kg<br>
 <b>Dosaje seleccionado:</b> según sistema Retak
@@ -377,6 +409,7 @@ let fecha = new Date().toLocaleDateString();
   ventana.document.close();
   ventana.print();
 }
+
 </script>
 
 </body>
